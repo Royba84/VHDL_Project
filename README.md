@@ -200,7 +200,7 @@ The results:
 Exactly as given in the .txt file.
 
 
-# Timing Analyzing & Signal Tap
+#  Signal Tap
 
 First I compiled the project on Quartus software:
 
@@ -226,6 +226,77 @@ DISPLAY,START,RST - Active low
 Hardware configuration:
 
 ![image](https://user-images.githubusercontent.com/105777016/178105264-5113cb5a-d8a9-4556-8e0b-117956c75478.png)
+
+
+After choosing DISPLAY and START, I made Basic OR operation between them:
+
+![image](https://user-images.githubusercontent.com/105777016/178105299-2f643e60-e3f4-4bf0-a053-6ead0c9e5540.png)
+
+Some states:
+
+1) First time - START
+![image](https://user-images.githubusercontent.com/105777016/178105315-65313908-d0f3-4b5d-8b77-6e5a853c900b.png)
+
+2) First time - DISPLAY
+
+![image](https://user-images.githubusercontent.com/105777016/178105335-c7b8c363-3c1e-4017-ab4f-b2b332485376.png)
+
+
+3) START being pressed inside the process
+
+![image](https://user-images.githubusercontent.com/105777016/178105332-57418f85-78f5-4493-96bd-a3f0a036cab3.png)
+
+
+4) RESET in the middle of DISPLAY mode
+
+![image](https://user-images.githubusercontent.com/105777016/178105336-58b297b7-df9c-4577-8a43-2dbc14bc9cd8.png)
+
+
+START:
+
+![image](https://user-images.githubusercontent.com/105777016/178105341-300f9b0a-cbde-41c7-97f8-ce37c13f2d7a.png)
+
+
+63 on the 7SEG:
+![image](https://user-images.githubusercontent.com/105777016/178105344-8e0687ca-94f4-4877-8fe1-805877b6cc7d.png)
+
+001 on the 7SEG:
+
+![image](https://user-images.githubusercontent.com/105777016/178105350-9810392a-39d9-4373-a646-bf2d0b036791.png)
+
+
+# Hardware flow summart including signal tap:
+
+![image](https://user-images.githubusercontent.com/105777016/178105361-24519126-cf84-4f89-b26c-40d42f0128cd.png)
+
+As expected, while using signal tap, more memory units were in use (19456 vs. 18432 without stap).
+
+# Timing Analyzer
+
+![image](https://user-images.githubusercontent.com/105777016/178105426-af4951bb-5364-41d0-80e9-83741e9ce5d6.png)
+
+The wizard:
+
+![image](https://user-images.githubusercontent.com/105777016/178105433-454db537-c892-4d62-9ad5-9d7637aab0fd.png)
+
+I am interested on "Report Fmax Summary" since i was requested in the system requirement to not pass the 50 [MHz] limit.
+
+![image](https://user-images.githubusercontent.com/105777016/178105470-f6a651ea-9ddf-4fe4-9757-c2f746a503cc.png)
+
+![image](https://user-images.githubusercontent.com/105777016/178105487-aee5ebee-3d0f-4e2a-bcef-321a70c27948.png)
+
+The maximal frequency is 96.01[MHz] which doesn't bother me because my project operates on 50[MHz] which proves - I do not have timing problems :)
+
+Finally, 
+this is the system as requested: [Using RTL viewer]
+
+![image](https://user-images.githubusercontent.com/105777016/178105516-bbb0109a-836c-4586-91c6-c666fc730a67.png)
+
+
+Video of the project operation:
+
+https://youtu.be/BonnT3YB5SE
+
 
 
 
