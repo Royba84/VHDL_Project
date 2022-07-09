@@ -85,3 +85,148 @@ Full image of 2 iterations, in the following image we will take a look in detail
 
 In this image, pay attention that for the signal PAR_DOUT inside the "SerialToParallel" label, the data is indeed correct.
 
+
+# 3) Main Controller
+
+![image](https://user-images.githubusercontent.com/105777016/178104438-1dd7f1fd-66b9-410c-a448-acdc97f25e1a.png)
+
+![image](https://user-images.githubusercontent.com/105777016/178104442-484de9e3-aae0-49e2-9b8a-f57628c4807d.png)
+
+How this block operates:
+The main controller gets his data from "Serial to Parallel" block through the following inputs:
+-DIN
+-DIN_VALID
+-PARITY_ERROR
+
+The inputs: "START" and "DISPLAY" are being pushed by the user (as shown in the videos in the end of this document) so that they pass through Asynchronic OneShot that will pass to the system in 1 pulse on 1 clock cycle only.
+First, the system in "idle" state until the button is pressed. in this state the system is in static state where all the signal and outputs are '0'.
+When "start" is being pressed, we will move toward the next state : "DATA_REQUEST_STATE". in this state the system gives as output DATA_REQUEST '1' for the block "SERIAL DATA GENERATOR" for 200 clock cycles and proceed to calculation mode (when the whole data was transferred not necessarily after 200 clock cycles).
+In addition, in this state the system adds up all the numbers into array and the whole errors as well into array for the parity number - PARITY_ERRROR.
+
+After receiving 64 data bytes, inside the array sort is being made using "bubble sort" method.
+After the sort is over, the next state is "DISPLAY" where we will see first the maximal value (by taking the last value of the array).
+
+The whole process can be summed up to this state machine:
+
+![image](https://user-images.githubusercontent.com/105777016/178104644-850f620a-c62a-441c-9e36-910316f834bd.png)
+
+This sub-state machine is responsible on when and in what order to present the values:
+
+![image](https://user-images.githubusercontent.com/105777016/178104664-eaf9b47c-06e2-440a-b013-d5b94f880642.png)
+
+
+Block implementation (Very large scale..) from quartos:
+
+![image](https://user-images.githubusercontent.com/105777016/178104635-4e17e425-774e-491d-a5df-821f6306ab74.png)
+
+
+Simulation results:
+
+![image](https://user-images.githubusercontent.com/105777016/178104696-49f458ef-cd4f-4f69-b3d4-315a81cbe319.png)
+
+We can see the "DISPLAY" button pressed, our machine presenting numbers.
+
+![image](https://user-images.githubusercontent.com/105777016/178104698-99f21e08-b373-4f93-9c3d-066f1952d008.png)
+
+
+# 4) BCD_to_7SEG
+
+![image](https://user-images.githubusercontent.com/105777016/178104741-791b9098-0ae9-4c4a-b634-581db7eaba29.png)
+
+
+Truth table:
+
+![image](https://user-images.githubusercontent.com/105777016/178104739-f5a1cfd9-ed2b-4cf6-8d7c-243e5859ea7d.png)
+
+
+![image](https://user-images.githubusercontent.com/105777016/178104742-1169bafb-9eb7-42cc-a433-801a30a368c6.png)
+
+This component job is to turn on LED's in a certain way to get numbers (digits) from 0 to 9.
+
+
+# 5) bin2bcd_12bit
+
+![image](https://user-images.githubusercontent.com/105777016/178104772-86aa6fe5-c4d9-448f-bb0a-a786b102eb16.png)
+
+![image](https://user-images.githubusercontent.com/105777016/178104776-3e86b9db-2205-4994-a1b6-7592a14ded04.png)
+
+This block gets binary number which consists 12 bits and divides the number to ones,tens,hundreds, thousends etc...
+
+
+
+# Asynchronic Oneshot
+
+Purpose: This component was implemented in order to face the following problem.
+When we press one time, instead of multiple pressings (because of high frequency clock) against our disabled reaction time to press the button.
+
+![image](https://user-images.githubusercontent.com/105777016/178104877-5ae69f86-6f59-4810-95da-288d83c0169d.png)
+
+
+# Statistics_calc - TOP LEVEL
+
+The top level holds the whole system blocks and operates them excatly as mentioned in the system requirements.
+
+![image](https://user-images.githubusercontent.com/105777016/178104902-888cb2b0-4381-4bde-a74b-142a5faea07f.png)
+
+Simulation results:
+
+![image](https://user-images.githubusercontent.com/105777016/178104914-d97dc535-e6a3-4c15-b8c4-07182a6bfa8d.png)
+
+Final results of the simulation, with a little effort it can be seen that our oneshot actually works and we have output to our LED's which shows the display states.
+
+![image](https://user-images.githubusercontent.com/105777016/178104917-c996128f-fa3d-4a36-a9d2-3ba0a8ea3464.png)
+
+Here it can be seen that the display button is pressed for a few time periods.
+
+![image](https://user-images.githubusercontent.com/105777016/178104922-8d65faf5-ef81-4e9b-9413-17ab1a15f7f8.png)
+
+
+
+# Hardware flow summary (from Quartos):
+
+![image](https://user-images.githubusercontent.com/105777016/178104995-86d0b80a-0c82-4ea3-827a-08834987315c.png)
+
+It can be seen that i use 18,432/4,567,040 memory which is less that 1% from the Cyclone V system.
+it is worth to mention that the only block that actually stores memory data is in the Serial_Data_Generator:
+
+![image](https://user-images.githubusercontent.com/105777016/178105028-accc7139-8622-43bb-9b48-884ef66b3167.png)
+![image](https://user-images.githubusercontent.com/105777016/178105031-980ef625-725c-456d-a331-d7ed32f96120.png)
+
+The results:
+
+![image](https://user-images.githubusercontent.com/105777016/178105143-e784c303-ac75-48a7-9289-d7635ce5996b.png)
+
+
+Exactly as given in the .txt file.
+
+
+# Timing Analyzing & Signal Tap
+
+First I compiled the project on Quartus software:
+
+![image](https://user-images.githubusercontent.com/105777016/178105066-26c902e6-a7c7-4853-a1f5-9fe9e8dab317.png)
+
+Made sure that all the compilation tasks were done successfully:
+
+![image](https://user-images.githubusercontent.com/105777016/178105113-0efe996f-9181-4a52-b103-891ae25c70d9.png)
+
+After that, i created a .stp file which was saved inside ".par" folder:
+
+![image](https://user-images.githubusercontent.com/105777016/178105173-2adb64da-ad11-45d7-b75a-97838eca7d88.png)
+
+Then, I connected the Cyclove V kit to power & computer:
+
+![image](https://user-images.githubusercontent.com/105777016/178105223-9a189af1-19a8-42cc-9cde-401645683ae8.png)
+
+Signal tap configuration:
+DISPLAY,START,RST - Active low
+
+![image](https://user-images.githubusercontent.com/105777016/178105245-036d5c09-7006-431d-9fb3-83b14683f5c3.png)
+
+Hardware configuration:
+
+![image](https://user-images.githubusercontent.com/105777016/178105264-5113cb5a-d8a9-4556-8e0b-117956c75478.png)
+
+
+
+
